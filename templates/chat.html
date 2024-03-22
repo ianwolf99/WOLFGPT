@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom-trained AI Chatbot</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %} <!-- Load static files -->
+    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <style>
+        /* Custom styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .background-image {
+            background-image: url("https://alphabet.nyc3.cdn.digitaloceanspaces.com/chatbot/farmer.jpeg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 100vh;
+        }
+        .chat-container {
+            background-color: #fff; /* White background */
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+            overflow: hidden; /* Prevent overflow from child elements */
+        }
+        .chat-header {
+            background-color: #007bff; /* Primary color for header */
+            color: #fff; /* Text color for header */
+            padding: 20px;
+            border-radius: 10px 10px 0 0; /* Rounded top corners */
+        }
+        .chat-messages {
+            max-height: 60vh; /* Limit height for better scroll */
+            overflow-y: auto; /* Enable vertical scroll */
+            padding: 10px;
+            scroll-behavior: smooth;
+            transition: scroll-behavior 0.5s ease;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .user-message {
+            background-color: #DCF8C6; /* Light green for user messages */
+            align-self: flex-start; /* Align user messages to the left */
+        }
+        .bot-message {
+            background-color: #EAEAEA; /* Light gray for bot messages */
+            align-self: flex-end; /* Align bot messages to the right */
+        }
+        .input-group {
+            margin-top: 20px;
+        }
+        .input-group-append button {
+            border-radius: 0 5px 5px 0; /* Rounded right corners for button */
+        }
+        .weather-widget-container {
+            margin-top: 20px;
+        }
+        .weatherwidget-io {
+            display: block;
+        }
+        .logo img {
+            max-width: 200px; /* Limit logo size for better layout */
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Side with Background Image -->
+            <div class="col-md-6 background-image d-flex align-items-center justify-content-center">
+                <!-- Empty div to center content vertically -->
+            </div>
+            <!-- Right Side with Chatbot Area -->
+            <div class="col-md-6">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="logo text-center">
+                            <!-- Your logo goes here -->
+                            <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="img-fluid">
+                        </div>
+                        <h2 class="text-center mt-3">Ask Anything About Agriculture</h2>
+                    </div>
+                    <div class="chat-messages">
+    {% for chat_entry in chat_history %}
+        <div class="message {% if chat_entry.2 == 'farmer' %}user-message{% else %}bot-message{% endif %}">
+            {% if forloop.first %} <!-- Check if it's the first entry in the loop -->
+                <div class="text">
+                    <strong>Assistant:</strong>
+                </div>
+            {% endif %}
+            <div class="text">
+                {% if chat_entry.2 == 'farmer' %}
+                    {{ chat_entry.0 }} <!-- Display farmer's question -->
+                {% else %}
+                    {{ chat_entry.1|safe }} <!-- Render assistant's response as HTML -->
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+                    <form method="post" action="{% url 'chat' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="input_text" placeholder="Type your message..." autocomplete="off">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Weather widget -->
+                <div class="weather-widget-container">
+                    <a class="weatherwidget-io" href="https://forecast7.com/en/n1d2936d82/nairobi/" data-label_1="NAIROBI" data-label_2="WEATHER" data-theme="original">NAIROBI WEATHER</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WeatherWidget.io Script -->
+    <script>
+        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+    </script>
+    <script>
+    // Function to scroll the chat messages container to the bottom
+    function scrollToBottom() {
+        var chatMessages = document.querySelector('.chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Call scrollToBottom function when the page loads
+    window.onload = function() {
+        scrollToBottom();
+    };
+
+    // Call scrollToBottom function after each form submission (when new messages are added)
+    document.addEventListener('submit', function(event) {
+        if (event.target.tagName.toLowerCase() === 'form') {
+            scrollToBottom();
+            event.preventDefault()
+        }
+    });
+</script>
+
+
+    
+    <!-- Bootstrap JS (optional, if needed) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
