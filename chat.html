@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTN Farmers Assistant</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    {% load static %} <!-- Load static files -->
+    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <style>
+        /* Custom styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .background-image {
+            background-image: url("https://alphabet.nyc3.cdn.digitaloceanspaces.com/chatbot/farmer.jpeg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 100vh;
+        }
+        .chat-container {
+            background-color: #fff; /* White background */
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+            overflow: hidden; /* Prevent overflow from child elements */
+        }
+        .chat-header {
+            background-color: #007bff; /* Primary color for header */
+            color: #fff; /* Text color for header */
+            padding: 20px;
+            border-radius: 10px 10px 0 0; /* Rounded top corners */
+        }
+        .chat-messages {
+            max-height: 35vh; /* Limit height for better scroll */
+            overflow-y: auto; /* Enable vertical scroll */
+            padding: 10px;
+            scroll-behavior: smooth;
+            transition: scroll-behavior 0.5s ease;
+            margin-bottom: 20px; /* Add margin to the bottom */
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .user-message {
+            background-color: #DCF8C6; /* Light green for user messages */
+            align-self: flex-start; /* Align user messages to the left */
+        }
+        .bot-message {
+            background-color: #EAEAEA; /* Light gray for bot messages */
+            align-self: flex-end; /* Align bot messages to the right */
+        }
+        .input-group {
+            margin-top: 20px;
+        }
+        .input-group-append button {
+            border-radius: 0 5px 5px 0; /* Rounded right corners for button */
+        }
+        .weather-widget-container {
+            margin-top: 20px;
+        }
+        .weatherwidget-io {
+            display: block;
+        }
+        .logo img {
+            max-width: 200px; /* Limit logo size for better layout */
+        }
+        @media (max-width: 767px) {
+            .background-image {
+                height: auto;
+                background-size: cover;
+            }
+        }
+        .container-fluid {
+            padding: 10px;
+        }
+        
+        .greeting-section, .overview-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .greeting-section h3, .overview-section h3 {
+            margin-bottom: 20px;
+        }
+        .greeting-section ul, .overview-section ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .greeting-section ul li, .overview-section ul li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .greeting-section ul li i, .overview-section ul li i {
+            margin-right: 10px;
+        }
+        .language-options {
+            text-align: center;
+        }
+        .language-options li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .language-options li:last-child {
+            margin-right: 0; /* Remove margin from the last item */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Side with Background Image -->
+            <div class="col-md-4 background-image d-flex align-items-center justify-content-center d-none d-sd-block">
+                <!-- Empty div to center content vertically -->
+            </div>
+            <!-- Right Side with Chatbot Area -->
+            <div class="col-md-8">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="logo text-center">
+                            <!-- Your logo goes here -->
+                            <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="img-fluid">
+                        </div>
+                        
+
+                    </div>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Greeting and Introduction -->
+                                <div class="greeting-section">
+                                    <h3 class="text-center">Jambo Mkulima</h3>
+                                    <p class="text-center">Welcome to our agricultural assistance bot. I'm here to help you with a variety of farming tasks and information.</p>
+                                    <p class="text-center">Please chat with your preferred language:</p>
+                                    <div class="language-options">
+                                        <span class="option"><i class="bi bi-globe"></i> English</span>
+                                        <span class="option"><i class="bi bi-translate"></i> Others</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Overview of Services -->
+                                <div class="overview-section">
+                                    <h3 class="text-center">Overview of Services</h3>
+                                    <ul class="text-center">
+                                        <li><i class="bi bi-cloud-sun"></i> Weather Updates</li>
+                                        <li><i class="bi bi-currency-dollar"></i> Market Prices</li>
+                                        <li><i class="bi bi-journal-check"></i> Agricultural Advice</li>
+                                        <li><i class="bi bi-calculator"></i> Profit and Loss Analysis</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages">
+    {% for chat_entry in chat_history %}
+        <div class="message {% if chat_entry.2 == 'farmer' %}user-message{% else %}bot-message{% endif %}">
+            {% if forloop.first %} <!-- Check if it's the first entry in the loop -->
+                <div class="text">
+                    <strong>Assistant:</strong>
+                </div>
+            {% endif %}
+            <div class="text">
+                {% if chat_entry.2 == 'farmer' %}
+                    {{ chat_entry.0 }} <!-- Display farmer's question -->
+                {% else %}
+                    {{ chat_entry.1|safe }} <!-- Render assistant's response as HTML -->
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+                    <form method="post" action="{% url 'chat' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="input_text" placeholder="Type your message..." autocomplete="off">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Chat</button>
+				<button type="button" class="btn btn-secondary" onclick="startNewChat()">New Chat</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Weather widget -->
+                <div class="weather-widget-container">
+                    <a class="weatherwidget-io" href="https://forecast7.com/en/n1d2936d82/nairobi/" data-label_1="NAIROBI" data-label_2="WEATHER" data-theme="original">NAIROBI WEATHER</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WeatherWidget.io Script -->
+    <script>
+        !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+    </script>
+    <script>
+    // Function to scroll the chat messages container to the bottom
+    function scrollToBottom() {
+        var chatMessages = document.querySelector('.chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Call scrollToBottom function when the page loads
+    window.onload = function() {
+        scrollToBottom();
+    };
+
+    // Call scrollToBottom function after each form submission (when new messages are added)
+    document.addEventListener('submit', function(event) {
+        if (event.target.tagName.toLowerCase() === 'form') {
+            scrollToBottom();
+            
+        }
+    });
+</script>
+<script>
+    // Function to start a new chat session
+    function startNewChat() {
+        // Redirect to the chat view with the parameter 'new_chat=True'
+        window.location.href = "{% url 'chat' %}?new_chat=True";
+    }
+</script>
+
+    
+    <!-- Bootstrap JS (optional, if needed) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<footer class="text-center mt-5 py-4 bg-light">
+    <div class="container">
+        <p class="mb-1">Copyright © 2024 -CTN Farmers Assistant. All Rights Reserved.</p>
+        <p class="mb-0">Powered By <a href="https://shiftechafrica.com/" class="text-primary" target="_blank">SHIFTECH AFRICA</a>.</p>
+    </div>
+</footer>
+</body>
+</html>
